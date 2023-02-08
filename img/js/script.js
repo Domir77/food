@@ -99,58 +99,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-    
-
-
-    const getResourse = async (url) => {
-        const res = await fetch(url);
- 
-        if (!res.ok) {
-              throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-        return await res.json();  //это промис
-    };
-
-    // getResourse('http://localhost:3000/menu')
-    // .then(data => {
-    //     data.forEach(({img, altimg, title, descr, price}) => {
-    //         new Menucard(amg, altimg, title, descr, price, '.menu .container').render();
-    //     });
-    // });
-
-    getResourse('http://localhost:3000/menu')
-    .then(data => createCard(data));
-
-    function createCard(data) {
-        data.forEach(({img, altimg, title, descr, price}) => {
-            const element = document.createElement('div');
-
-            element.classList.add('form');
-
-            element.innerHTML = `
-                <img src=${img} alt=${altimg}>
-                <h3 class="menu__item-subtitle">${title}</h3>
-                <div class="menu__item-descr">${descr}</div>
-                <div class="menu__item-divider"></div>
-                <div class="menu__item-price">
-                    <div class="menu__item-cost">Цена:</div>
-                    <div class="menu__item-total"><span>${price}</span> грн/день</div>
-                </div>            
-            `;
-
-            document.querySelector('.menu .container').append(element);
-        });
-
-    }
-
-
-
-
-
-
-
-
-
     // Forms
 
     const forms = document.querySelectorAll('form');
@@ -163,22 +111,10 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     forms.forEach(item => {
-        bindPostData(item);
+        postData(item);
     });
 
-     const postData = async (url, data) => {
-        const res = await fetch(url, {    
-            method: "POST",
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: data
-        });
-
-        return await res.json();  //это промис
-     };
-
-    function bindPostData(form) {
+    function postData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -197,19 +133,23 @@ window.addEventListener('DOMContentLoaded', () => {
             // request.setRequestHeader('Content-type', 'application/json');
             const formData = new FormData(form);
             
-            
-            const json = JSON.stringify(Object.fromEntries(formData.entries()));
-            
 
-            // const object = {};
-            // formData.forEach(function (value, key) {
-            //     object[key] = value;
-            // });
+            const object = {};
+            formData.forEach(function (value, key) {
+                object[key] = value;
+            });
             
             // request.send(formData);
             // request.send(json);
 
-            postData('http://localhost:3000/requests', json) //промис
+            fetch('server.php', {
+                method: "POST",
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            })
+            .then(data => data.text())
             .then(data => {
                 console.log(data);
                 showThanksModal(message.success);
@@ -262,8 +202,6 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 4000);
     }
-
-
  
 
 
